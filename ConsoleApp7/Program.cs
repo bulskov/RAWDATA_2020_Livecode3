@@ -6,6 +6,22 @@ namespace ConsoleApp7
 {
     static class MyUtil
     {
+
+        public static IEnumerable<T> MyDistinct<T>(this IEnumerable<T> collection)
+        {
+            HashSet<T> seen = new HashSet<T>();
+
+            foreach (var elem in collection)
+            {
+                if (!seen.Contains(elem))
+                {
+                    seen.Add(elem);
+                    yield return elem;
+                }
+            }
+
+        }
+
         public static IEnumerable<T> MyWhere<T>(this IEnumerable<T> collection, Func<T, bool> pred)
         {
             foreach (var elem in collection)
@@ -15,7 +31,13 @@ namespace ConsoleApp7
             }
         }
 
-        public static 
+        public static IEnumerable<S> MySelect<T, S>(this IEnumerable<T> collection, Func<T, S> selector)
+        {
+            foreach (var elem in collection)
+            {
+                yield return selector(elem);
+            }
+        }
     }
     class Person
     {
@@ -46,11 +68,22 @@ namespace ConsoleApp7
 
             var q = numbers.Where(x => x < 10);
 
+            List<Person> result = new List<Person>();
+            foreach (var person in people)
+            {
+                if(person.Age > 23)
+                    result.Add(person);
+
+            }
+
+
+
             var q2 = 
                 people
-                    .MyWhere(p => p.Age > 23)
+                    .Where(p => p.Age > 23)
                     .OrderBy(p => p.Name)
-                    .Select(p => new {p.Name, p.Age})
+                    .MySelect(p => new {p.Name, p.Age})
+                    .Distinct()
                     ;
 
             foreach (var number in q2)
